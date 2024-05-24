@@ -1,7 +1,5 @@
 ﻿namespace KursovaTPO.MergeSortAlgorithms;
 using System;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 
 // Клас для паралельного сортування злиттям

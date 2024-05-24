@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("KursovaTPO")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6dfea01c343e82e3e79a243e10224338312e671b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+01eb009273c0401d9ad9e9f481595235dd133ced")]
 [assembly: System.Reflection.AssemblyProductAttribute("KursovaTPO")]
 [assembly: System.Reflection.AssemblyTitleAttribute("KursovaTPO")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
