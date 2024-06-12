@@ -1,69 +1,130 @@
-﻿using KursovaTPO.ArrayTools;
+﻿using KursovaTPO.ArrayHelpTools;
 using KursovaTPO.MergeSortAlgorithms;
-
-namespace KursovaTPO.Tests;
-using System;
 using System.Diagnostics;
-using System.Linq;
 
-// Клас для виконання тестування продуктивності алгоритмів сортування.
-class SortPerformanceTester
+namespace KursovaTPO.Tests
 {
-    // Метод для тестування послідовної реалізації сортування.
-    public static void TestSequentialSort(int[] sizes)
+    /// <summary>
+    /// Class for testing the performance of sorting algorithms.
+    /// </summary>
+    public class SortPerformanceTester
     {
-        // Ітерація через різні розміри масиву для тестування.
-        foreach (int size in sizes)
+        private const int DefaultTrials = 5;
+
+        /// <summary>
+        /// Tests the performance of the sequential merge sort.
+        /// </summary>
+        /// <param name="sizes">Array sizes to test.</param>
+        /// <param name="trials">Number of trials for each size. Default is 5.</param>
+        public static void TestSequentialMergeSort(int[] sizes, int trials = DefaultTrials)
+        {
+            foreach (int size in sizes)
+            {
+                double averageTime = RunTrials(size, trials, SequentialMergeSort<double>.Sort);
+                Console.WriteLine($"Average SequentialMergeSort time for {size} elements over {trials} trials: {averageTime} ms\n");
+            }
+        }
+
+        /// <summary>
+        /// Tests the performance of the parallel merge sort.
+        /// </summary>
+        /// <param name="sizes">Array sizes to test.</param>
+        /// <param name="threads">Array of thread counts to test.</param>
+        /// <param name="trials">Number of trials for each size and thread count. Default is 5.</param>
+        public static void TestParallelMergeSort(int[] sizes, int[] threads, int trials = DefaultTrials)
+        {
+            foreach (int size in sizes)
+            {
+                foreach (int thread in threads)
+                {
+                    double averageTime = RunParallelTrials(size, thread, trials);
+                    Console.WriteLine($"Average ParallelMergeSort time for {size} elements with {thread} threads over {trials} trials: {averageTime} ms\n");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Tests the performance of the parallel merge sort with various thresholds.
+        /// </summary>
+        /// <param name="sizes">Array sizes to test.</param>
+        /// <param name="thresholds">Array of threshold values to test.</param>
+        /// <param name="trials">Number of trials for each size and threshold. Default is 5.</param>
+        public static void TestParallelMergeSortWithThresholds(int[] sizes, int[] thresholds, int trials = DefaultTrials)
+        {
+            int maxThreads = Environment.ProcessorCount;
+            foreach (int size in sizes)
+            {
+                foreach (int threshold in thresholds)
+                {
+                    double averageTime = RunParallelTrialsWithThreshold(size, threshold, maxThreads, trials);
+                    Console.WriteLine($"Average ParallelMergeSort time for {size} elements with threshold {threshold} and {maxThreads} threads over {trials} trials: {averageTime} ms\n");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Runs the trials for the specified sort method and calculates the average time.
+        /// </summary>
+        /// <param name="size">The size of the array to sort.</param>
+        /// <param name="trials">The number of trials to run.</param>
+        /// <param name="sortMethod">The sorting method to test.</param>
+        /// <returns>The average time in milliseconds for the sorting method over the specified number of trials.</returns>
+        private static double RunTrials(int size, int trials, Action<double[]> sortMethod)
         {
             double totalMilliseconds = 0;
-            int trials = 5; // Кількість пробігів для кожної розмірності.
-
-            // Проведення декількох випробувань для отримання середнього часу.
             for (int trial = 0; trial < trials; trial++)
             {
-                int[] array = ArrayGenerator.GenerateArray(size); // Генерація масиву.
-                var sort = new SequentialMergeSort(); // Створення екземпляра сортувальника.
-
-                Stopwatch sw = Stopwatch.StartNew(); // Запуск таймера.
-                sort.Sort(array, 0, array.Length - 1); // Виконання сортування.
-                sw.Stop(); // Зупинка таймера.
-
-                totalMilliseconds += sw.Elapsed.TotalMilliseconds; // Накопичення часу виконання.
-                Console.WriteLine($"Sequential Sort time for {size} elements at trial {trial+1}: {sw.Elapsed.TotalMilliseconds} ms");
+                double[] array = ArrayExtensions.GenerateArray(size);
+                Stopwatch sw = Stopwatch.StartNew();
+                sortMethod(array);
+                sw.Stop();
+                totalMilliseconds += sw.Elapsed.TotalMilliseconds;
             }
-
-            double averageMilliseconds = totalMilliseconds / trials; // Обчислення середнього часу.
-            Console.WriteLine($"Average Sequential Sort time for {size} elements over {trials} trials: {averageMilliseconds} ms\n");
+            return totalMilliseconds / trials;
         }
-    }
 
-    // Метод для тестування паралельної реалізації сортування.
-    public static void TestParallelSort(int[] sizes, int[] processorCounts)
-    {
-        // Ітерація через різні розміри та кількості потоків.
-        foreach (int size in sizes)
+        /// <summary>
+        /// Runs the trials for the parallel merge sort and calculates the average time.
+        /// </summary>
+        /// <param name="size">The size of the array to sort.</param>
+        /// <param name="thread">The number of threads to use.</param>
+        /// <param name="trials">The number of trials to run.</param>
+        /// <returns>The average time in milliseconds for the parallel merge sort over the specified number of trials.</returns>
+        private static double RunParallelTrials(int size, int thread, int trials)
         {
-            foreach (int count in processorCounts)
+            double totalMilliseconds = 0;
+            for (int trial = 0; trial < trials; trial++)
             {
-                double totalMilliseconds = 0;
-                int trials = 5; // Кількість пробігів для кожного набору параметрів.
-
-                // Проведення декількох випробувань для отримання середнього часу.
-                for (int trial = 0; trial < trials; trial++)
-                {
-                    int[] array = ArrayGenerator.GenerateArray(size); // Генерація масиву.
-                    
-                    Stopwatch sw = Stopwatch.StartNew(); // Запуск таймера.
-                    ParallelMergeSort.MergeSort(array, count); // Виконання паралельного сортування.
-                    sw.Stop(); // Зупинка таймера.
-                    
-                    totalMilliseconds += sw.Elapsed.TotalMilliseconds; // Накопичення часу виконання.
-                    Console.WriteLine($"Parallel Merge Sort time for {size} elements with {count} threads at trial {trial+1}: {sw.Elapsed.TotalMilliseconds} ms");
-                }
-
-                double averageMilliseconds = totalMilliseconds / trials; // Обчислення середнього часу.
-                Console.WriteLine($"Average Parallel Merge Sort time for {size} elements with {count} threads over {trials} trials: {averageMilliseconds} ms\n");
+                double[] array = ArrayExtensions.GenerateArray(size);
+                int threshold = array.Length / thread;
+                Stopwatch sw = Stopwatch.StartNew();
+                ParallelMergeSort<double>.Sort(array, threshold, thread);
+                sw.Stop();
+                totalMilliseconds += sw.Elapsed.TotalMilliseconds;
             }
+            return totalMilliseconds / trials;
+        }
+
+        /// <summary>
+        /// Runs the trials for the parallel merge sort with a specific threshold and calculates the average time.
+        /// </summary>
+        /// <param name="size">The size of the array to sort.</param>
+        /// <param name="threshold">The threshold value to use for switching to sequential sort.</param>
+        /// <param name="threads">The number of threads to use.</param>
+        /// <param name="trials">The number of trials to run.</param>
+        /// <returns>The average time in milliseconds for the parallel merge sort over the specified number of trials.</returns>
+        private static double RunParallelTrialsWithThreshold(int size, int threshold, int threads, int trials)
+        {
+            double totalMilliseconds = 0;
+            for (int trial = 0; trial < trials; trial++)
+            {
+                double[] array = ArrayExtensions.GenerateArray(size);
+                Stopwatch sw = Stopwatch.StartNew();
+                ParallelMergeSort<double>.Sort(array, threshold, threads);
+                sw.Stop();
+                totalMilliseconds += sw.Elapsed.TotalMilliseconds;
+            }
+            return totalMilliseconds / trials;
         }
     }
 }

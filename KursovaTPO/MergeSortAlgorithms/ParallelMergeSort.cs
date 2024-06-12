@@ -1,76 +1,83 @@
-﻿namespace KursovaTPO.MergeSortAlgorithms;
-using System;
-using System.Threading.Tasks;
-
-// Клас для паралельного сортування злиттям
-class ParallelMergeSort
+﻿namespace KursovaTPO.MergeSortAlgorithms
 {
-    // Головна методика сортування злиттям, яка використовує паралелізм
-    public static void MergeSort(int[] array, int numberOfProcessors)
+    using System;
+    using System.Threading.Tasks;
+
+    /// <summary>
+    /// Provides a parallel implementation of the merge sort algorithm.
+    /// </summary>
+    /// <typeparam name="T">The type of elements in the array to be sorted, which must implement IComparable<T>.</typeparam>
+    public class ParallelMergeSort<T> where T : IComparable<T>
     {
-        int n = array.Length;
-        int h = numberOfProcessors;
-        int logP = (int)Math.Log2(numberOfProcessors);  // Визначення кількості рівнів глибини злиття
-
-        // Крок 1: Локальне сортування кожного підмасиву паралельно
-        Parallel.For(0, numberOfProcessors, i =>
+        /// <summary>
+        /// Public method to start the parallel merge sort.
+        /// </summary>
+        /// <param name="arr">The array to be sorted.</param>
+        /// <param name="threshold">The size threshold below which to use sequential sort.</param>
+        /// <param name="threadNum">The maximum degree of parallelism.</param>
+        public static void Sort(T[] arr, int threshold, int threadNum)
         {
-            int start = i * (n / numberOfProcessors);  // Початок підмасиву
-            int end = (i == numberOfProcessors - 1) ? n : (i + 1) * (n / numberOfProcessors);  // Кінець підмасиву
-            Array.Sort(array, start, end - start);  // Сортування підмасиву
-        });
-
-        // Крок 2: Паралельне злиття відсортованих підмасивів
-        for (int j = 0; j < logP; j++)
-        {
-            int currentH = h / (int)Math.Pow(2, j + 1);  // Кількість активних потоків на поточному рівні
-            Parallel.For(0, currentH, i =>
-            {
-                int start = i * (2 * (n / (currentH * 2)));  // Початок злиття
-                int mid = start + (n / (currentH * 2));  // Середина злиття
-                int end = start + 2 * (n / (currentH * 2));  // Кінець злиття
-                if (i == currentH - 1 && currentH * 2 < h) // Перевірка для останнього масиву
-                {
-                    end = n;  // Забезпечує, що останній масив включає всі залишкові елементи
-                }
-
-                int[] merged = new int[end - start];
-                Merge(array, start, mid, end, merged);
-                Array.Copy(merged, 0, array, start, merged.Length);
-            });
+            T[] temp = new T[arr.Length];
+            var options = new ParallelOptions { MaxDegreeOfParallelism = threadNum };
+            ParallelMergeSortRecursive(arr, temp, 0, arr.Length-1, threshold, options);
         }
-    }
 
-    // Метод для злиття двох відсортованих підмасивів у один
-    private static void Merge(int[] array, int left, int middle, int right, int[] result)
-    {
-        int i = left;  // Початковий індекс для лівої частини
-        int j = middle;  // Початковий індекс для правої частини
-        int k = 0;  // Індекс для результуючого масиву
-
-        // Злиття двох масивів у відсортованому порядку
-        while (i < middle && j < right)
+        /// <summary>
+        /// Internal method to handle recursive parallel sorting.
+        /// </summary>
+        private static void ParallelMergeSortRecursive(T[] arr, T[] temp, int low, int high, int threshold, ParallelOptions options)
         {
-            if (array[i] <= array[j])
+            if (high - low + 1 <= threshold)
             {
-                result[k++] = array[i++];
+                MergeSort(arr, temp, low, high);
             }
             else
             {
-                result[k++] = array[j++];
+                int mid = low + (high - low) / 2;
+                Parallel.Invoke(options,
+                    () => ParallelMergeSortRecursive(arr, temp, low, mid, threshold, options),
+                    () => ParallelMergeSortRecursive(arr, temp, mid + 1, high, threshold, options)
+                );
+                Merge(arr, temp, low, mid, high);
             }
         }
 
-        // Копіювання залишилися елементів з лівого підмасиву
-        while (i < middle)
+        /// <summary>
+        /// Performs the merge operation to combine two sorted subarrays into one.
+        /// </summary>
+        private static void Merge(T[] arr, T[] temp, int low, int mid, int high)
         {
-            result[k++] = array[i++];
+            int i = low, j = mid + 1, k = low;
+            while (i <= mid && j <= high)
+            {
+                temp[k++] = arr[i].CompareTo(arr[j]) <= 0 ? arr[i++] : arr[j++];
+            }
+
+            while (i <= mid)
+            {
+                temp[k++] = arr[i++];
+            }
+
+            while (j <= high)
+            {
+                temp[k++] = arr[j++];
+            }
+
+            Array.Copy(temp, low, arr, low, high - low + 1);
         }
 
-        // Копіювання залишилися елементів з правого підмасиву
-        while (j < right)
+        /// <summary>
+        /// A sequential merge sort used when the subarray size is below the threshold.
+        /// </summary>
+        private static void MergeSort(T[] arr, T[] temp, int low, int high)
         {
-            result[k++] = array[j++];
+            if (low < high)
+            {
+                int mid = low + (high - low) / 2;
+                MergeSort(arr, temp, low, mid);
+                MergeSort(arr, temp, mid + 1, high);
+                Merge(arr, temp, low, mid, high);
+            }
         }
     }
 }

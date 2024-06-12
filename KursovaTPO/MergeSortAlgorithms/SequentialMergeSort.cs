@@ -1,75 +1,72 @@
-﻿namespace KursovaTPO.MergeSortAlgorithms;
+﻿namespace KursovaTPO.MergeSortAlgorithms
+{
+    using System;
 
-// Клас для послідовної реалізації алгоритму сортування злиттям
-class SequentialMergeSort {
-
-    // Об'єднує два підмасиви arr[]. Перший підмасив це arr[l..m], другий — arr[m+1..r]
-    public void Merge(int[] arr, int l, int m, int r)
+    /// <summary>
+    /// Provides an implementation of the merge sort algorithm.
+    /// </summary>
+    /// <typeparam name="T">The type of elements in the array to be sorted.</typeparam>
+    public class SequentialMergeSort<T> where T : IComparable<T>
     {
-        // Визначаємо розміри двох підмасивів для злиття
-        int n1 = m - l + 1;
-        int n2 = r - m;
+        /// <summary>
+        /// Sorts an array using the merge sort algorithm.
+        /// </summary>
+        /// <param name="arr">The array to be sorted.</param>
+        public static void Sort(T[] arr)
+        {
+            T[] temp = new T[arr.Length];
+            MergeSort(arr, temp, 0, arr.Length - 1);
+        }
 
-        // Створюємо тимчасові масиви
-        int[] L = new int[n1];
-        int[] R = new int[n2];
-        int i, j;
-
-        // Копіюємо дані до тимчасових масивів
-        for (i = 0; i < n1; ++i)
-            L[i] = arr[l + i];
-        for (j = 0; j < n2; ++j)
-            R[j] = arr[m + 1 + j];
-
-        // Об'єднуємо тимчасові масиви
-
-        // Початкові індекси першого і другого підмасивів
-        i = 0;
-        j = 0;
-
-        // Початковий індекс об'єднаного підмасиву
-        int k = l;
-        while (i < n1 && j < n2) {
-            if (L[i] <= R[j]) {
-                arr[k] = L[i];
-                i++;
+        /// <summary>
+        /// Recursively sorts subarrays and then merges them.
+        /// </summary>
+        /// <param name="arr">The array to be sorted.</param>
+        /// <param name="temp">Temporary array used for merging.</param>
+        /// <param name="low">The starting index of the subarray.</param>
+        /// <param name="high">The ending index of the subarray.</param>
+        private static void MergeSort(T[] arr, T[] temp, int low, int high)
+        {
+            if (low < high)
+            {
+                int mid = low + (high - low) / 2;
+                MergeSort(arr, temp, low, mid);
+                MergeSort(arr, temp, mid + 1, high);
+                Merge(arr, temp, low, mid, high);
             }
-            else {
-                arr[k] = R[j];
-                j++;
+        }
+
+        /// <summary>
+        /// Merges two sorted subarrays into a single sorted subarray.
+        /// </summary>
+        /// <param name="arr">The original array containing the subarrays to be merged.</param>
+        /// <param name="temp">Temporary array to hold merged results.</param>
+        /// <param name="low">The starting index of the first subarray.</param>
+        /// <param name="mid">The ending index of the first subarray.</param>
+        /// <param name="high">The ending index of the second subarray.</param>
+        private static void Merge(T[] arr, T[] temp, int low, int mid, int high)
+        {
+            int i = low, j = mid + 1, k = low;
+            // Merge the two sorted subarrays into a temporary array.
+            while (i <= mid && j <= high)
+            {
+                temp[k++] = arr[i].CompareTo(arr[j]) <= 0 ? arr[i++] : arr[j++];
             }
-            k++;
-        }
 
-        // Копіюємо решту елементів з L[], якщо вони залишились
-        while (i < n1) {
-            arr[k] = L[i];
-            i++;
-            k++;
-        }
+            // Copy the remaining elements of left subarray, if any.
+            while (i <= mid)
+            {
+                temp[k++] = arr[i++];
+            }
 
-        // Копіюємо решту елементів з R[], якщо вони залишились
-        while (j < n2) {
-            arr[k] = R[j];
-            j++;
-            k++;
-        }
-    }
+            // Copy the remaining elements of right subarray, if any.
+            while (j <= high)
+            {
+                temp[k++] = arr[j++];
+            }
 
-    // Головна функція, що сортує масив arr[l..r] використовуючи merge()
-    public void Sort(int[] arr, int l, int r)
-    {
-        if (l < r) {
-
-            // Знаходимо середню точку
-            int m = l + (r - l) / 2;
-
-            // Сортуємо першу та другу половини
-            Sort(arr, l, m);
-            Sort(arr, m + 1, r);
-
-            // Об'єднуємо відсортовані половини
-            Merge(arr, l, m, r);
+            // Copy the merged temporary array to the original array.
+            Array.Copy(temp, low, arr, low, high - low + 1);
         }
     }
 }

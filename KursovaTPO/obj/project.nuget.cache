@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Y8wvqvhRL6Mi50XXAw9FBLhnPkbIMIH1KuQkrJZDLSmqcU/zmxy5JDO2WNaGGkM746hUo535IUizpRLYIWKvSQ==",
+  "dgSpecHash": "akvZSH2joX10rp8R7tquZUPlrRzcG9hp2StDc82sOiXgWfBWIWKedQo15x9R6H8c7GjHCAZ1ubWlnszZksZnGA==",
   "success": true,
-  "projectFilePath": "E:\\KursovaTPORelease\\KursovaTPO\\KursovaTPO\\KursovaTPO.csproj",
+  "projectFilePath": "E:\\KursovaTPO\\KursovaTPO\\KursovaTPO.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\12345\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.30\\microsoft.netcore.app.ref.6.0.30.nupkg.sha512",
     "C:\\Users\\12345\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.30\\microsoft.windowsdesktop.app.ref.6.0.30.nupkg.sha512",

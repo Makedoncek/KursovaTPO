@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\KursovaTPORelease\\KursovaTPO\\KursovaTPO\\KursovaTPO.csproj",
+      "projectUniqueName": "E:\\KursovaTPO\\KursovaTPO\\KursovaTPO.csproj",
       "projectName": "KursovaTPO",
-      "projectPath": "E:\\KursovaTPORelease\\KursovaTPO\\KursovaTPO\\KursovaTPO.csproj",
+      "projectPath": "E:\\KursovaTPO\\KursovaTPO\\KursovaTPO.csproj",
       "packagesPath": "C:\\Users\\12345\\.nuget\\packages\\",
-      "outputPath": "E:\\KursovaTPORelease\\KursovaTPO\\KursovaTPO\\obj\\",
+      "outputPath": "E:\\KursovaTPO\\KursovaTPO\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\12345\\AppData\\Roaming\\NuGet\\NuGet.Config"
